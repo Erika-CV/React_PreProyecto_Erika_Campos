@@ -1,0 +1,140 @@
+.cart-drawer {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 350px;
+  height: 100%;
+  background: #fff;
+  box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+  transition: right 0.3s ease-in-out;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+.cart-drawer.open {
+  right: 0;
+}
+
+.cart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #eee;
+  padding: 1rem;
+  border-bottom: 1px solid #ccc;
+}
+
+.cart-title {
+  margin: 0;
+  color: black;
+}
+
+.close-button {
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #333;
+}
+
+.cart-content {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.empty-cart {
+  text-align: center;
+  color: red;
+  font-weight: bold;
+}
+
+.cart-items {
+  display: flex;
+  flex-direction: column; /* asegura que estén en columna */
+  gap: 0.5rem;             /* separa los productos */
+}
+
+.cart-item {
+  display: flex;
+  flex-direction: row;         /* contenido interno en fila */
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem;
+  background: #f8f8f8;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+
+.item-details {
+  flex: 1;
+  margin-right: 0.5rem;
+  word-wrap: break-word;
+  color: #000;
+  font-weight: 500;
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #e74c3c;
+  font-size: 1.2rem;
+  transition: transform 0.1s ease;
+}
+
+.delete-btn:hover {
+  transform: scale(1.1);
+}
+
+.trash-icon {
+  pointer-events: none;
+}
+
+.cart-total {
+  margin-top: 1rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  text-align: right;
+  color : black;
+  
+}
+
+.cart-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.btn-clear,
+.btn-checkout {
+  flex: 1;
+  padding: 0.6rem;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.btn-clear {
+  background-color: #f44336;
+  color: white;
+}
+
+.btn-clear:hover {
+  background-color: #d32f2f;
+}
+
+.btn-checkout {
+  background-color: #4caf50;
+  color: white;
+}
+
+.btn-checkout:hover {
+  background-color: #388e3c;
+}
