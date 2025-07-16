@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import Header from './estaticos/Header'
 import Footer from './estaticos/Footer'
 import { CartContext } from '../context/CartContext'
+
 const DetallesProducto = () => {
   const { id } = useParams()
   const { productos, agregarCarrito } = useContext(CartContext)

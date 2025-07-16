@@ -8,7 +8,7 @@ import Contacto from './pages/Contacto'
 import NotFound from './pages/NotFound'
 import DetalleProducto from './components/DetallesProducto'
 import Admin from './pages/Admin'
-import RutasProtegidas from './Rutas/RutasProtegidas
+import RutasProtegidas from './rutas/RutasProtegidas'
 import {CartContext} from './context/CartContext'
 
 function App() {
