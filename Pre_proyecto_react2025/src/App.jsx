@@ -6,6 +6,10 @@ import AcercaDe from './pages/AcercaDe'
 import GaleriaDeProductos from './pages/GaleriaDeProductos'
 import Contacto from './pages/Contacto'
 import NotFound from './pages/NotFound'
+import DetalleProducto from './components/DetallesProducto'
+import Admin from './pages/Admin'
+import RutasProtegidas from './Rutas/RutasProtegidas
+import {CartContext} from './context/CartContext'
 
 function App() {
   const [cart, setCart] = useState([])//ver funcionamiento carga de productos
