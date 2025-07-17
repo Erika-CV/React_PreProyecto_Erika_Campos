@@ -15,6 +15,7 @@ export const CartProvider = ({ children }) => {
   const [isAuthenticated, setIsAuth] = useState(false);
   const [busqueda, setBusqueda] = useState("");
 
+  // Cargar productos desde el JSON
   useEffect(() => {
     fetch('/data/data.json')
       .then(res => res.json())
@@ -31,36 +32,41 @@ export const CartProvider = ({ children }) => {
       });
   }, []);
 
+  // Guardar carrito en localStorage
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
 
+  // Filtro de búsqueda
   const productosFiltrados = productos.filter(producto =>
     producto?.title.toLowerCase().includes(busqueda.toLowerCase())
   );
 
+  // Agregar al carrito
   const handleAddToCart = (product) => {
     const productInCart = cart.find(item => item.id === product.id);
+
     if (productInCart) {
       setCart(cart.map(item =>
         item.id === product.id
-          ? { ...item, cantidad: product.cantidad }
+          ? { ...item, quantity: item.quantity + product.quantity }
           : item
       ));
     } else {
       toast.success(`El producto "${product.title}" se ha agregado al carrito`);
-      setCart([...cart, { ...product, cantidad: product.cantidad }]);
+      setCart([...cart, { ...product, quantity: product.quantity }]);
     }
   };
 
+  // Eliminar del carrito
   const handleDeleteFromCart = (product) => {
     toast.error(`El producto "${product.title}" se ha eliminado del carrito`);
     setCart(prevCart =>
       prevCart
         .map(item => {
           if (item.id === product.id) {
-            return item.cantidad > 1
-              ? { ...item, cantidad: item.cantidad - 1 }
+            return item.quantity > 1
+              ? { ...item, quantity: item.quantity - 1 }
               : null;
           } else {
             return item;
@@ -70,10 +76,21 @@ export const CartProvider = ({ children }) => {
     );
   };
 
+  // Vaciar carrito
   const clearCart = () => {
     setCart([]);
     localStorage.removeItem("cart");
     toast.info('¡Compra finalizada!');
+  };
+
+  //  Resetear contadores de cantidad
+  const resetCounters = () => {
+    setCart(prevCart =>
+      prevCart.map(product => ({
+        ...product,
+        quantity: 0
+      }))
+    );
   };
 
   return (
@@ -85,12 +102,13 @@ export const CartProvider = ({ children }) => {
         error,
         handleAddToCart,
         handleDeleteFromCart,
+        clearCart,
+        resetCounters, 
         isAuthenticated,
         setIsAuth,
         productosFiltrados,
         busqueda,
-        setBusqueda,
-        clearCart
+        setBusqueda
       }}
     >
       {children}

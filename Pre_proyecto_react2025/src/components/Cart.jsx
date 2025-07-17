@@ -1,7 +1,34 @@
-import React from 'react'
-import './styleCart.css'
+import React, { useContext, useEffect } from 'react';
+import '../components/styleCart.css';
+import { CartContext } from '../context/CartContext';
+import { toast } from 'react-toastify';
 
-const Cart = ({ cartItems, isOpen, onClose, borrarProducto, vaciarCarrito }) => {
+const Cart = ({ isOpen, onClose }) => {
+  const { cart = [], handleDeleteFromCart, clearCart, resetCounters } = useContext(CartContext);
+
+  useEffect(() => {
+    // Reinicia los contadores al cargar la página
+    resetCounters?.();
+  }, [ resetCounters]);
+
+  const calcularTotal = () => {
+    return cart.reduce((acc, item) => {
+      const price = parseFloat(item.price) || 0;
+      const quantity = item.quantity || 0;
+      return acc + price * quantity;
+    }, 0).toFixed(2);
+  };
+
+  const handleClearCart = () => {
+    clearCart();
+    toast.info("Vaciaste el carrito");
+  };
+
+  const handleCheckout = () => {
+    toast.success("¡Gracias por tu compra!");
+    clearCart();
+  };
+
   return (
     <div className={`cart-drawer ${isOpen ? 'open' : ''}`}>
       <div className='cart-header'>
@@ -10,16 +37,16 @@ const Cart = ({ cartItems, isOpen, onClose, borrarProducto, vaciarCarrito }) => 
       </div>
 
       <div className='cart-content'>
-        {cartItems.length === 0 ? (
+        {cart.length === 0 ? (
           <p className='empty-cart'>El carrito está vacío</p>
         ) : (
           <ul className='cart-items'>
-            {cartItems.map((item) => (
+            {cart.map((item) => (
               <li key={item.id} className='cart-item'>
                 <span className='item-details'>
-                  {item.title} - ${item.price} x {item.quantity}
+                  {item.title} - ${parseFloat(item.price).toFixed(2)} x {item.quantity}
                 </span>
-                <button className='delete-btn' onClick={() => borrarProducto(item)}>
+                <button className='delete-btn' onClick={() => handleDeleteFromCart(item)}>
                   <i className="fa-solid fa-trash trash-icon"></i>
                 </button>
               </li>
@@ -27,17 +54,15 @@ const Cart = ({ cartItems, isOpen, onClose, borrarProducto, vaciarCarrito }) => 
           </ul>
         )}
 
-        {cartItems.length > 0 && (
+        {cart.length > 0 && (
           <>
             <div className='cart-total'>
-              <strong>Total:</strong> ${cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0).toFixed(2)}
+              <strong>Total:</strong> ${calcularTotal()}
             </div>
 
             <div className='cart-actions'>
-              <button className='btn-clear' onClick={vaciarCarrito}>Vaciar carrito</button>
-              <button className='btn-checkout' onClick={() => alert('¡Gracias por tu compra!')}>
-                Finalizar compra
-              </button>
+              <button className='btn-clear' onClick={handleClearCart}>Vaciar carrito</button>
+              <button className='btn-checkout' onClick={handleCheckout}>Finalizar compra</button>
             </div>
           </>
         )}
@@ -46,5 +71,4 @@ const Cart = ({ cartItems, isOpen, onClose, borrarProducto, vaciarCarrito }) => 
   );
 };
 
-
-export default Cart
+export default Cart;

@@ -1,43 +1,60 @@
 import { Link } from 'react-router-dom';
-import React, { useState } from 'react'
-import './styleProductos.css'
+import React, { useState } from 'react';
+import '../components/styleProductos.css';
 
 const Productos = ({ producto, agregarCarrito }) => {
+  const [cantidad, setCantidad] = useState(1); // empieza en 1 por defecto
 
-  const [cantidad, setCantidad] = useState(0);
+  const increase = () => {
+    if (cantidad < producto.count) {
+      setCantidad(prev => prev + 1);
+    }
+  };
 
-  const increase = () => setCantidad(prev => (prev < producto.count ? prev + 1 : prev));
-  const decrease = () => setCantidad(prev => (prev > 1 ? prev - 1 : 0));
+  const decrease = () => {
+    if (cantidad > 1) {
+      setCantidad(prev => prev - 1);
+    }
+  };
+
+  const handleAgregarCarrito = () => {
+    if (producto.count === 0 || cantidad === 0) return;
+    agregarCarrito({ ...producto, quantity: cantidad });
+    setCantidad(0); // Reiniciar
+  };
+
 
   return (
-    <section className='card'>
-      <div className='imganContainer'>
-        <img src={producto.image} alt="" className='imagen' />
+    <section className="card">
+      <div className="imganContainer">
+        <img src={producto.image} alt={producto.title} className="imagen" />
       </div>
 
-      <h3 className='nombre'>{producto.title}</h3>
-      <p className='precio'>${producto.price}</p>
-      <p className='descripcion'>{producto.description}</p>
-      <p className='categoria'>{producto.category}</p>
-      <p className='stock'>{producto.count}</p>
+      <h3 className="nombre">{producto.title}</h3>
+      <p className="precio">${producto.price}</p>
+      <p className="descripcion">{producto.description}</p>
+      <p className="categoria">Categoría: {producto.category}</p>
+      <p className="stock">Stock disponible: {producto.count}</p>
 
-
-      <div className='cantidadContainer'>
-        <button className='qtyButton' onClick={decrease} disabled={cantidad === 0}>-</button>
-        <span>{cantidad}</span>
-        <button className='qtyButton' onClick={increase}>+</button>
+      <div className="cantidadContainer">
+        <button className="qtyButton" onClick={decrease} disabled={cantidad <= 1}>-</button>
+        <span className="cantidad">{cantidad}</span>
+        <button className="qtyButton" onClick={increase} disabled={cantidad >= producto.count}>+</button>
       </div>
 
-      <button disabled={cantidad === 0}
-        onClick={() => agregarCarrito({ ...producto, cantidad },
-          setCantidad(0))}> Agregar al carrito</button>
-          
+      <button
+        onClick={handleAgregarCarrito}
+        className="btn-agregar"
+        disabled={producto.count === 0}
+      >
+        Agregar al carrito
+      </button>
+
       <Link to={`/product/${producto.id}`}>
-        <button>Ver detalle</button>
+        <button className="btn-detalle">Ver detalle</button>
       </Link>
+    </section>
+  );
+};
 
-    </section >
-  )
-}
-
-export default Productos
+export default Productos;
