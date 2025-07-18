@@ -4,24 +4,34 @@ import { useNavigate } from 'react-router-dom';
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({});
   const [isAuth, setIsAuth] = useState(false);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
- useEffect(() => {
-  const auth = localStorage.getItem('isAuth') === 'true';
-  setIsAuth(auth);
-  if (auth) navigate('/admin');
-}, [navigate]);
+  // Persistencia de sesión
+  useEffect(() => {
+    const auth = localStorage.getItem('isAuth') === 'true';
+    setIsAuth(auth);
+    setLoading(false);
 
+    if (auth && window.location.pathname === '/login') {
+      navigate('/admin');
+    }
+  }, [navigate]);
 
-  const handleSubmit = async (e) => {
+  // Guardar estado de autenticación
+  useEffect(() => {
+    localStorage.setItem('isAuth', isAuth.toString());
+  }, [isAuth]);
+
+  // Manejo de login
+  const handleSubmit = async (e, formEmail, formPassword) => {
     e.preventDefault();
-    let validationErrors = {};
-    if (!email) validationErrors.email = 'Email es requerido';
-    if (!password) validationErrors.password = 'Password es requerido';
+
+    const validationErrors = {};
+    if (!formEmail) validationErrors.email = 'Email es requerido';
+    if (!formPassword) validationErrors.password = 'Password es requerido';
 
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
@@ -29,41 +39,48 @@ export const AuthProvider = ({ children }) => {
     }
 
     try {
-      const res = await fetch('data/users.json');
+      const res = await fetch('/data/users.json');
       const users = await res.json();
 
       const foundUser = users.find(
-        (user) => user.email === email && user.password === password
+        (user) => user.email === formEmail && user.password === formPassword
       );
 
       if (!foundUser) {
         setErrors({ email: 'Credenciales inválidas' });
       } else {
+        setIsAuth(true);
+        localStorage.setItem('user', JSON.stringify(foundUser));
+
         if (foundUser.role === 'admin') {
-          setIsAuth(true);
-          localStorage.setItem('isAuth', 'true');
           navigate('/admin');
         } else {
           navigate('/');
         }
       }
     } catch (err) {
-      console.error('Error fetching users:', err);
-      setErrors({ email: 'Algo salió mal. Por favor, inténtalo de nuevo más tarde.' });
+      console.error('Error al cargar usuarios:', err);
+      setErrors({ email: 'Error del servidor. Intenta más tarde.' });
     }
   };
 
   const logout = () => {
     setIsAuth(false);
     localStorage.removeItem('isAuth');
+    localStorage.removeItem('user');
     navigate('/login');
   };
 
   return (
     <AuthContext.Provider
-      value={{ email, setEmail, password, setPassword, handleSubmit, errors, isAuth, logout }}
+      value={{
+        handleSubmit,
+        errors,
+        isAuth,
+        logout
+      }}
     >
-      {children}
+      {!loading && children}
     </AuthContext.Provider>
   );
 };

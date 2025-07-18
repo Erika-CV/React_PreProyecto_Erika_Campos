@@ -1,15 +1,12 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext } from 'react';
 import '../components/styleCart.css';
 import { CartContext } from '../context/CartContext';
 import { toast } from 'react-toastify';
 
 const Cart = ({ isOpen, onClose }) => {
-  const { cart = [], handleDeleteFromCart, clearCart, resetCounters } = useContext(CartContext);
+  const { cart = [], handleDeleteFromCart, clearCart } = useContext(CartContext);
 
-  useEffect(() => {
-    // Reinicia los contadores al cargar la página
-    resetCounters?.();
-  }, [ resetCounters]);
+  
 
   const calcularTotal = () => {
     return cart.reduce((acc, item) => {

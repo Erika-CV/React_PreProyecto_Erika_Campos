@@ -5,8 +5,9 @@ import Footer from '../components/estaticos/Footer';
 import ProductList from '../components/ProductList';
 import loading from '../assets/loading.gif';
 import { CartContext } from '../context/CartContext';
+import { useAdmin } from '../context/AdminContext';
 
-const Home = ({ productos, cargando }) => {
+const Home = () => {
   const {
     cartItems,
     agregarCarrito,
@@ -14,6 +15,10 @@ const Home = ({ productos, cargando }) => {
     vaciarCarrito
   } = useContext(CartContext);
 
+  const {
+    productos,
+    cargando
+  } = useAdmin();
   return (
     <>
       <Header
@@ -43,3 +48,4 @@ const Home = ({ productos, cargando }) => {
 };
 
 export default Home;
+

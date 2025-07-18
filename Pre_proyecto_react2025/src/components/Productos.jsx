@@ -1,9 +1,12 @@
 import { Link } from 'react-router-dom';
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import '../components/styleProductos.css';
+import { CartContext } from '../context/CartContext';
+import { toast } from 'react-toastify';
 
-const Productos = ({ producto, agregarCarrito }) => {
-  const [cantidad, setCantidad] = useState(1); // empieza en 1 por defecto
+const Productos = ({ producto }) => {
+  const [cantidad, setCantidad] = useState(0);
+  const { handleAddToCart } = useContext(CartContext);
 
   const increase = () => {
     if (cantidad < producto.count) {
@@ -18,11 +21,19 @@ const Productos = ({ producto, agregarCarrito }) => {
   };
 
   const handleAgregarCarrito = () => {
-    if (producto.count === 0 || cantidad === 0) return;
-    agregarCarrito({ ...producto, quantity: cantidad });
-    setCantidad(0); // Reiniciar
-  };
+    if (producto.count === 0) {
+      toast.warn("Este producto no tiene stock disponible.");
+      return;
+    }
 
+    if (cantidad === 0) {
+      toast.warn("Por favor, seleccioná una cantidad antes de agregar al carrito.");
+      return;
+    }
+
+    handleAddToCart({ ...producto, quantity: cantidad });
+    setCantidad(0);
+  };
 
   return (
     <section className="card">
@@ -31,15 +42,27 @@ const Productos = ({ producto, agregarCarrito }) => {
       </div>
 
       <h3 className="nombre">{producto.title}</h3>
-      <p className="precio">${producto.price}</p>
+      <p className="precio">${parseFloat(producto.price).toFixed(2)}</p>
       <p className="descripcion">{producto.description}</p>
       <p className="categoria">Categoría: {producto.category}</p>
       <p className="stock">Stock disponible: {producto.count}</p>
 
       <div className="cantidadContainer">
-        <button className="qtyButton" onClick={decrease} disabled={cantidad <= 1}>-</button>
+        <button
+          className="qtyButton"
+          onClick={decrease}
+          disabled={cantidad <= 1}
+        >
+          -
+        </button>
         <span className="cantidad">{cantidad}</span>
-        <button className="qtyButton" onClick={increase} disabled={cantidad >= producto.count}>+</button>
+        <button
+          className="qtyButton"
+          onClick={increase}
+          disabled={cantidad >= producto.count}
+        >
+          +
+        </button>
       </div>
 
       <button

@@ -1,128 +1,112 @@
-import { createContext, useEffect, useState } from "react";
-import Swal from "sweetalert2";
+import { createContext, useContext, useEffect, useState } from 'react';
+import { toast } from "react-toastify";
 
-export const AdminContext = createContext()
+const AdminContext = createContext();
+
+const API_URL = 'https://687909fd63f24f1fdca09597.mockapi.io/products';
 
 export const AdminProvider = ({ children }) => {
-    const [productos, setProductos] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [open, setOpen] = useState(false)
-    const [seleccionado, setSeleccionado] = useState(null)
-    const [openEditor, setOpenEditor] = useState(false)
-    const apiUrl = 'https://682e2f0e746f8ca4a47c2dbd.mockapi.io/product'
+  const [productos, setProductos] = useState([]);
+  const [cargando, setCargando] = useState(true);
+  const [open, setOpen] = useState(false);
+  const [openEditor, setOpenEditor] = useState(false);
+  const [seleccionado, setSeleccionado] = useState(null);
 
-
-    useEffect(() => {
-        fetch(apiUrl)
-            .then((response) => response.json())
-            .then((data) => {
-                setTimeout(() => {
-                    setProductos(data);
-                    setLoading(false);
-                }, 2000);
-            })
-            .catch((error) => {
-                console.error("Error fetching data:", error);
-                setError(true);
-                setLoading(false);
-            });
-    }, []);
-
-    const cargarProductos = async () => {
-        try {
-            const res = await fetch(apiUrl)
-            const data = await res.json()
-            setProductos(data)
-        } catch (error) {
-            console.log('Error al cargar productos ', error);
-
-        }
+  // 🔄 Cargar productos desde MockAPI
+  const obtenerProductos = async () => {
+    try {
+      const res = await fetch(API_URL);
+      const data = await res.json();
+      setProductos(data);
+    } catch (error) {
+      console.error('Error al obtener productos:', error);
+    } finally {
+      setCargando(false);
     }
+  };
 
-    const agregarProducto = async (producto) => {
-        try {
-            const respuesta = await fetch('https://682e2f0e746f8ca4a47c2dbd.mockapi.io/product', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(producto)
-            })
-            if (!respuesta.ok) {
-                throw new Error('Error al agregar producto')
-            }
-            const data = await respuesta.json()
-            Swal.fire({
-                title: ":)!",
-                text: "Producto agregado correctamente!",
-                icon: "success"
-            });
-            cargarProductos()
-            setOpen(false)
-        } catch (error) {
-            console.log(error.message);
+  useEffect(() => {
+    obtenerProductos();
+  }, []);
 
-        }
+  // ✅ Crear producto
+  const agregarProducto = async (nuevoProducto) => {
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(nuevoProducto),
+      });
+      const data = await res.json();
+      setProductos((prev) => [...prev, data]);
+    } catch (error) {
+      console.error('Error al agregar producto:', error);
     }
+  };
 
-    const actulizarProducto = async (producto) => {
-        try {
-            const respuesta = await fetch(`${apiUrl}/${producto.id}`,
-                {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(producto)
-                })
-            if (!respuesta.ok) throw Error('Error al actualizar el producto')
-            const data = await respuesta.json()
-            alert('Producto actualizado correctamente')
-            setOpenEditor(false)
-            setSeleccionado(null)
-            cargarProductos()
-        } catch (error) {
-            console.log(error.message);
-
-        }
+  // ✏️ Actualizar producto
+  const actualizarProducto = async (productoEditado) => {
+    try {
+      const res = await fetch(`${API_URL}/${String(productoEditado.id)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(productoEditado),
+      });
+      const data = await res.json();
+      setProductos((prev) =>
+        prev.map((prod) => (prod.id === data.id ? data : prod))
+      );
+    } catch (error) {
+      console.error('Error al actualizar producto:', error);
     }
+  };
 
-    const eliminarProducto = async (id) => {
-        const confirmar = window.confirm('Estas seguro de eliminar el producto?')
-        if (confirmar) {
-            try {
-                const respuesta = await fetch(`https://682e2f0e746f8ca4a47c2dbd.mockapi.io/product/${id}`, {
-                    method: 'DELETE',
-                })
-                if (!respuesta.ok) throw Error('Error al eliminar')
-                
-                Swal.fire({
-                    title: ":(!",
-                    text: "Producto Eliminado correctamente!",
-                    icon: "error"
-                });
-                cargarProductos()
-            } catch (error) {
-                alert('Hubo un problema al eliminar el producto')
-            }
+  // ❌ Eliminar producto
+  const eliminarProducto = async (id) => {
+    try {
+      const respuesta = await fetch(`https://687909fd63f24f1fdca09597.mockapi.io/products/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!respuesta.ok) {
+        if (respuesta.status === 404) {
+          toast.error("El producto ya fue eliminado o no existe.");
+          return;
         }
-    }
+        toast.error("Error al eliminar el producto.");
+        return;
+      }
 
-    return (
-        <AdminContext.Provider value={{
-            productos,
-            loading,
-            open,
-            setOpen,
-            openEditor,
-            setOpenEditor,
-            seleccionado,
-            setSeleccionado,
-            agregarProducto,
-            actulizarProducto,
-            eliminarProducto,
-        }}>
-            {children}
-        </AdminContext.Provider>
-    )
-}
+      setProductos((prevProductos) =>
+        prevProductos.filter((producto) => producto.id !== id)
+      );
+
+      toast.success("Producto eliminado correctamente.");
+    } catch (error) {
+      console.error("Error al eliminar producto:", error.message);
+      toast.error(`Error: ${error.message}`);
+    }
+  };
+
+  return (
+    <AdminContext.Provider
+      value={{
+        productos,
+        cargando,
+        open,
+        setOpen,
+        openEditor,
+        setOpenEditor,
+        seleccionado,
+        setSeleccionado,
+        agregarProducto,
+        actualizarProducto,
+        eliminarProducto,
+      }}
+    >
+      {children}
+    </AdminContext.Provider>
+  );
+};
+
+export const useAdmin = () => useContext(AdminContext);

@@ -15,9 +15,15 @@ export const CartProvider = ({ children }) => {
   const [isAuthenticated, setIsAuth] = useState(false);
   const [busqueda, setBusqueda] = useState("");
 
-  // Cargar productos desde el JSON
+  // Estados para paginación
+  const [paginaActual, setPaginaActual] = useState(1);
+  const productosPorPagina = 8;
+
+  const API_URL = "https://687909fd63f24f1fdca09597.mockapi.io/products";
+
+  // Cargar productos desde MockApi
   useEffect(() => {
-    fetch('/data/data.json')
+    fetch(API_URL)
       .then(res => res.json())
       .then(datos => {
         setTimeout(() => {
@@ -42,10 +48,29 @@ export const CartProvider = ({ children }) => {
     producto?.title.toLowerCase().includes(busqueda.toLowerCase())
   );
 
+  // Total de páginas
+  const totalPaginas = Math.ceil(productosFiltrados.length / productosPorPagina);
+
+  // Productos a mostrar en la página actual
+  const indexInicio = (paginaActual - 1) * productosPorPagina;
+  const indexFin = indexInicio + productosPorPagina;
+  const productosPaginados = productosFiltrados.slice(indexInicio, indexFin);
+
+  // Cambiar de página
+  const cambiarPagina = (nuevaPagina) => {
+    if (nuevaPagina >= 1 && nuevaPagina <= totalPaginas) {
+      setPaginaActual(nuevaPagina);
+    }
+  };
+
+  // Obtener un producto por ID
+  const getProductoPorId = (id) => {
+    return productos.find(producto => producto.id === parseInt(id));
+  };
+
   // Agregar al carrito
   const handleAddToCart = (product) => {
     const productInCart = cart.find(item => item.id === product.id);
-
     if (productInCart) {
       setCart(cart.map(item =>
         item.id === product.id
@@ -83,7 +108,7 @@ export const CartProvider = ({ children }) => {
     toast.info('¡Compra finalizada!');
   };
 
-  //  Resetear contadores de cantidad
+  // Resetear contadores
   const resetCounters = () => {
     setCart(prevCart =>
       prevCart.map(product => ({
@@ -103,12 +128,17 @@ export const CartProvider = ({ children }) => {
         handleAddToCart,
         handleDeleteFromCart,
         clearCart,
-        resetCounters, 
+        resetCounters,
         isAuthenticated,
         setIsAuth,
         productosFiltrados,
+        productosPaginados,
+        totalPaginas,
+        paginaActual,
+        cambiarPagina,
         busqueda,
-        setBusqueda
+        setBusqueda,
+        getProductoPorId
       }}
     >
       {children}

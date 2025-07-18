@@ -8,7 +8,7 @@ import DetallesProducto from './components/DetallesProducto';
 import RutasProtegidas from './rutas/RutasProtegidas';
 import Admin from './pages/Admin';
 import Login from './pages/Login';
-import { useAuth } from './context/AuthContext';  // IMPORTAR hook correcto
+import { useAuth } from './context/AuthContext';  
 
 function App() {
   const { isAuth } = useAuth();  // obtener estado de autenticación
